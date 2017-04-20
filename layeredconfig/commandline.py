@@ -149,14 +149,14 @@ class Commandline(ConfigSource):
             for arg in vars(self.source).keys():
                 if arg.startswith(self.sectionkey) and getattr(self.source, arg) is not None:
                     k = arg[len(self.sectionkey):]
-                    if k.startswith("_"):
+                    if k.startswith("%"):
                         k = k[1:]
-                    if "_" not in k and getattr(self.source, arg) is not None:
+                    if "%" not in k and getattr(self.source, arg) is not None:
                         yield k
 
     def has(self, key):
         if self.sectionkey:
-            key = self.sectionkey + "_" + key
+            key = self.sectionkey + "%" + key
         try:
             return getattr(self.source, key) is not None
         except AttributeError:
@@ -164,11 +164,11 @@ class Commandline(ConfigSource):
 
     def get(self, key):
         if self.sectionkey:
-            key = self.sectionkey + "_" + key
+            key = self.sectionkey + "%" + key
         r = getattr(self.source, key)
         # undo the automatic list behaviour for autodiscovered
         # arguments (which has store='append')
-        key = key.replace("_", self.sectionsep)
+        key = key.replace("%", self.sectionsep)
         if (key in self.autoargs and
             isinstance(r, list) and len(r) == 1):
             return r[0]
@@ -189,23 +189,23 @@ class Commandline(ConfigSource):
         for args in subsectionsource.keys():
             if args.startswith(self.sectionkey):
                 args = args[len(self.sectionkey):]
-                if args.startswith("_"): # sectionsep
+                if args.startswith("%"): # sectionsep
                     args = args[1:]
             else:
                 continue
-            # '_' is the hardcoded section separator once parse_args
+            # '%' is the hardcoded section separator once parse_args
             # has transformed the command line args into properties on
             # a Namespace object.
-            if "_" in args:
-                section = args.split("_")[0]
+            if "%" in args:
+                section = args.split("%")[0]
                 if section not in yielded:
                     yield(section)
                     yielded.add(section)
 
     def subsection(self, key):
         if self.sectionkey:
-            key = self.sectionkey + "_" + key
-        
+            key = self.sectionkey + "%" + key
+
         return Commandline(self.commandline,
                            sectionsep=self.sectionsep,
                            source=self.source,
